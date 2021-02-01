@@ -1,5 +1,6 @@
-from flask import request, json, Response, Blueprint, g
+from flask import request, json, Response, Blueprint, g, jsonify
 from ..models.UserModels import UserModels, UserSchema
+from ..auth.Authentication import Auth
 
 user_api = Blueprint('user_api', __name__)
 user_schema = UserSchema()
@@ -24,11 +25,17 @@ def SignUp():
             "message": 'Email already taken, please use another email address.'
         }), status=400)
 
+    # Save to database
     user = UserModels(data)
     user.save()
-    # user_dump = user_schema.dump(user) # use it when auth ready
+
+    # Generate Token
+    user_dump = user_schema.dump(user)
+    token = Auth.generate_token(user_dump.get('id'))
+
     return Response(mimetype="application/json", response=json.dumps({
-        "message": "Created Successfully"
+        "message": "Created Successfully",
+        "token": token,
     }), status=201)
 
 
@@ -58,6 +65,11 @@ def SignIn():
             "message": "Invalid Password"
         }), status=400)
 
+    # Generate Token
+    user_data = user_schema.dump(is_user)
+    token = Auth.generate_token(user_data.get('id'))
+
     return Response(mimetype="application/json", response=json.dumps({
-        "message": "Login Successfully"
+        "message": "Login Successfully",
+        "token": token
     }), status=200)
