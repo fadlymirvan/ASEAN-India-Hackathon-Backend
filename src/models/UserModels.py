@@ -1,6 +1,6 @@
+from . import db, bcrypt
 from marshmallow import fields, Schema
 import datetime
-from . import db, bcrypt
 
 
 class UserModels(db.Model):
@@ -12,6 +12,7 @@ class UserModels(db.Model):
     name = db.Column(db.String(128), nullable=False)
     email = db.Column(db.String(60), nullable=False, unique=True)
     country = db.Column(db.String(60), nullable=False)
+    user_type = db.Column(db.Integer, nullable=False)
     password = db.Column(db.String(128), nullable=False)
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
@@ -21,6 +22,7 @@ class UserModels(db.Model):
         self.name = data.get('name')
         self.email = data.get('email')
         self.country = data.get('country')
+        self.user_type = data.get('user_type')
         self.password = self.generate_hash(data.get('password'))
         self.created_at = datetime.datetime.utcnow()
         self.updated_at = datetime.datetime.utcnow()
@@ -68,6 +70,7 @@ class UserSchema(Schema):
     name = fields.Str(required=True)
     email = fields.Email(required=True)
     country = fields.Str(required=True)
+    user_type = fields.Int(required=True)
     password = fields.Str(required=True, load_only=True)
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
