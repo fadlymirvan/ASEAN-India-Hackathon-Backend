@@ -1,6 +1,4 @@
-from flask import json, request, Response, g
-from functools import wraps
-from ..models.UserModels import UserModels
+from flask import json, Response, g
 import datetime, jwt, os
 
 
@@ -41,7 +39,3 @@ class Auth():
         except jwt.InvalidTokenError:
             decode_token['error'] = {"message": "Invalid Token, Please Try Again."}
             return decode_token
-
-    @staticmethod
-    def auth_required(func):
-        pass
