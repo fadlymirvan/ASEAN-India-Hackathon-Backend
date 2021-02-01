@@ -20,13 +20,14 @@ class UserModels(db.Model):
     def __init__(self, data):
         self.name = data.get('name')
         self.email = data.get('email')
-        self.generate_hash(data.get('password'))
+        self.country = data.get('country')
+        self.password = self.generate_hash(data.get('password'))
         self.created_at = datetime.datetime.utcnow()
         self.updated_at = datetime.datetime.utcnow()
 
     def save(self):
-        self.session.add(self)
-        self.session.commit()
+        db.session.add(self)
+        db.session.commit()
 
     def update(self, data):
         for key, item in data.items():
