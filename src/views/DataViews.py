@@ -1,8 +1,10 @@
-from flask import request, json, Blueprint, Response, send_file, send_from_directory
+from flask import request, json, Blueprint, Response, send_file
 from werkzeug.utils import secure_filename
 from ..models.DataModels import DataModels, DataSchema
 from numpy import genfromtxt
+import urllib.request
 import datetime
+import json
 import csv
 import os
 
@@ -134,15 +136,15 @@ def generate_csv():
                      as_attachment=True)
 
 
-@data_api.route('/csv/upload', methods=['POST'])
-def upload_file_csv():
+@data_api.route('/upload', methods=['POST'])
+def upload_imported_data():
     url = request.get_json()
     url = url['link']
     save_to_db(url)
     return Response(mimetype="application/json", response=json.dumps({
-            "message": "File Successfully Uploaded",
-            "status": 201,
-        }), status=201)
+        "message": "File Successfully Uploaded",
+        "status": 201,
+    }), status=201)
 
 
 @data_api.route('/file/upload', methods=['POST'])
@@ -181,12 +183,40 @@ def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
+def save_to_db(file_path):
+    file_type = file_path.split(".")
+    if "csv" in file_type:
+        save_csv_to_db(file_path)
+
+    else:
+        save_json_to_db(file_path)
+
+
+def save_json_to_db(file_path):
+    read_json = urllib.request.urlopen(file_path).read()
+    dataset = json.loads(read_json)
+    format_date = "%Y-%m-%d"
+    for data in dataset:
+        date = datetime.datetime.strptime(data['date'].replace("'", ""), format_date)
+        record = {
+            'created_at': date,
+            'lat': data['lat_bin'],
+            'long': data['lon_bin'],
+            'frequency': data['mmsi'],
+            'fishing_hours': data['fishing_hours'],
+            'source_id': 1
+        }
+
+        data = DataModels(record)
+        data.save()
+
+
 def load_csv_data(file_path):
     data = genfromtxt(file_path, delimiter=',', skip_header=1, converters={0: lambda s: str(s)})
     return data.tolist()
 
 
-def save_to_db(file_path):
+def save_csv_to_db(file_path):
     dataset = load_csv_data(file_path)
     format_date = "%Y-%m-%d"
     for data in dataset:
