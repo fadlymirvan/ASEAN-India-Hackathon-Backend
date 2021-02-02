@@ -1,4 +1,4 @@
-from . import db, DataSchema
+from . import db
 from marshmallow import fields, Schema
 import datetime
 
@@ -42,7 +42,7 @@ class SourceModels(db.Model):
     def get_source_by_id(id):
         return SourceModels.query.get(id)
 
-    def __repr(self):
+    def __repr__(self):
         return '<id {}>'.format(self.id)
 
 
@@ -52,4 +52,6 @@ class SourceSchema(Schema):
     type = fields.Str(required=True)
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
-    data_rel = fields.Nested(DataSchema, many=True)
+
+    class Meta:
+        fields = ('id', 'name', 'type', 'created_at', 'updated_at')

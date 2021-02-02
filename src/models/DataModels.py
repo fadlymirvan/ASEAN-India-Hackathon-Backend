@@ -1,4 +1,4 @@
-from . import db
+from . import db, SourceSchema
 from marshmallow import fields, Schema
 import datetime
 
@@ -9,12 +9,14 @@ class DataModels(db.Model):
 
     # column
     id = db.Column(db.Integer, primary_key=True)
-    source_id = db.Column(db.Integer, db.ForeignKey('source.id'), nullable=False)
+    source_id = db.Column(db.Integer, db.ForeignKey('source.id', ondelete='CASCADE'), nullable=False)
     lat = db.Column(db.Text, nullable=False)
     long = db.Column(db.Text, nullable=False)
     frequency = db.Column(db.Text, nullable=False)
+    fishing_hours = db.Column(db.Text, nullable=False)
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
+    source_rel = db.relationship('SourceModels', backref='data', lazy=True)
 
     # class constructor
     def __init__(self, data):
@@ -22,6 +24,7 @@ class DataModels(db.Model):
         self.long = data.get('long')
         self.source_id = data.get('source_id')
         self.frequency = data.get('frequency')
+        self.fishing_hours = data.get('fishing_hours')
         self.created_at = datetime.datetime.utcnow()
         self.updated_at = datetime.datetime.utcnow()
 
@@ -45,7 +48,7 @@ class DataModels(db.Model):
     def get_data_by_id(id):
         return DataModels.query.get(id)
 
-    def __repr(self):
+    def __repr__(self):
         return '<id {}>'.format(self.id)
 
 
@@ -55,5 +58,7 @@ class DataSchema(Schema):
     lat = fields.Str(required=True)
     long = fields.Str(required=True)
     frequency = fields.Str(required=True)
+    fishing_hours = fields.Str(required=True)
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
+    source_rel = fields.Nested(SourceSchema, many=False, only=('name', 'type'))

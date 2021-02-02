@@ -12,6 +12,7 @@ class UserTypeModels(db.Model):
     name = db.Column(db.String(60), nullable=False)
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
+    user_rel = db.relationship('UserModels', backref='user_type', lazy=True)
 
     # class constructor
     def __init__(self, data):
@@ -39,7 +40,7 @@ class UserTypeModels(db.Model):
     def get_user_type_by_id(id):
         return UserTypeModels.query.get(id)
 
-    def __repr(self):
+    def __repr__(self):
         return '<id {}>'.format(self.id)
 
 
@@ -48,3 +49,6 @@ class UserTypeSchema(Schema):
     name = fields.Str(required=True)
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
+
+    class Meta:
+        fields = ('id', 'name')

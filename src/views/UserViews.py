@@ -73,3 +73,13 @@ def SignIn():
         "message": "Login Successfully",
         "token": token
     }), status=200)
+
+
+@user_api.route('/all', methods=['GET'])
+def get_all_user():
+    req = UserModels.get_all_user()
+    data = user_schema.dump(req, many=True)
+
+    return Response(mimetype="application/json", response=json.dumps({
+        "data": data
+    }), status=200)
