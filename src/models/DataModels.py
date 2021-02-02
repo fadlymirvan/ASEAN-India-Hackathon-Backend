@@ -27,8 +27,8 @@ class DataModels(db.Model):
         self.fishing_hours = data.get('fishing_hours')
         self.created_at = data.get('created_at')
         if not self.created_at:
-            self.created_at = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
-        self.updated_at = datetime.datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S")
+            self.created_at = datetime.datetime.utcnow().strftime("%Y-%m-%d")
+        self.updated_at = datetime.datetime.utcnow().strftime("%Y-%m-%d")
 
     def save(self):
         db.session.add(self)

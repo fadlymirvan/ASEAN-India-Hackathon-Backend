@@ -1,4 +1,4 @@
-from flask import request, json, Blueprint, Response, send_file
+from flask import request, json, Blueprint, Response, send_file, send_from_directory
 from werkzeug.utils import secure_filename
 from ..models.DataModels import DataModels, DataSchema
 from numpy import genfromtxt
@@ -134,7 +134,18 @@ def generate_csv():
                      as_attachment=True)
 
 
-@data_api.route('/upload', methods=['POST'])
+@data_api.route('/csv/upload', methods=['POST'])
+def upload_file_csv():
+    url = request.get_json()
+    url = url['link']
+    save_to_db(url)
+    return Response(mimetype="application/json", response=json.dumps({
+            "message": "File Successfully Uploaded",
+            "status": 201,
+        }), status=201)
+
+
+@data_api.route('/file/upload', methods=['POST'])
 def upload_file():
     if 'file' not in request.files:
         return Response(mimetype="application/json", response=json.dumps({
@@ -177,7 +188,7 @@ def load_csv_data(file_path):
 
 def save_to_db(file_path):
     dataset = load_csv_data(file_path)
-    format_date = "%Y-%m-%d %H:%M:%S"
+    format_date = "%Y-%m-%d"
     for data in dataset:
         date = datetime.datetime.strptime(data[0][1:].replace("'", ""), format_date)
         record = {
