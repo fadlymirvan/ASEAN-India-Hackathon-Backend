@@ -1,6 +1,7 @@
-from flask import request, json, Blueprint, Response, g
+from flask import request, json, Blueprint, Response, send_file
 from ..models.DataModels import DataModels, DataSchema
-from flask_jwt_extended import jwt_required
+import csv
+import io
 
 data_api = Blueprint('data_api', __name__)
 data_schema = DataSchema()
@@ -87,3 +88,35 @@ def delete(data_id):
     return Response(mimetype="application/json", response=json.dumps({
         "message": "Deleted Successfully",
     }), status=200)
+
+
+@data_api.route('/download', methods=['GET'])
+def generate_csv():
+    file = 'D:/Project/ASEAN-IndiaHackathon/backend/static/csv/fishing_data.csv'
+    with open(file, 'w') as csvfile:
+        output_csv = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
+
+        headers = [
+            'date',
+            'lat_bin',
+            'long_bin',
+            'mmsi',
+            'fishing_hours'
+        ]
+
+        db_headers = [
+            'created_at',
+            'lat',
+            'long',
+            'frequency',
+            'fishing_hours'
+        ]
+
+        output_csv.writerow(headers)
+
+        for record in DataModels.get_all_data():
+            output_csv.writerow([getattr(record, c) for c in db_headers])
+
+    return send_file(file, mimetype="text/csv",
+                     attachment_filename='fishing_data.csv',
+                     as_attachment=True)
