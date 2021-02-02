@@ -16,7 +16,7 @@ class UserModels(db.Model):
     password = db.Column(db.String(128), nullable=False)
     created_at = db.Column(db.DateTime)
     updated_at = db.Column(db.DateTime)
-    user_rel = db.relationship('UserTypeModels', backref='users', lazy=True)
+    user_role = db.relationship('UserTypeModels', backref='users', lazy=True)
 
     # class constructor
     def __init__(self, data):
@@ -75,4 +75,4 @@ class UserSchema(Schema):
     password = fields.Str(required=True, load_only=True)
     created_at = fields.DateTime(dump_only=True)
     updated_at = fields.DateTime(dump_only=True)
-    user_rel = fields.Nested(UserTypeSchema, many=False, only=('name',))
+    user_role = fields.Nested(UserTypeSchema, many=False, only=('name',))
