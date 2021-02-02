@@ -1,6 +1,8 @@
 from flask import request, json, Blueprint, Response, send_file
 from werkzeug.utils import secure_filename
 from ..models.DataModels import DataModels, DataSchema
+from numpy import genfromtxt
+import datetime
 import csv
 import os
 
@@ -8,10 +10,6 @@ data_api = Blueprint('data_api', __name__)
 data_schema = DataSchema()
 
 ALLOWED_EXTENSIONS = {'txt', 'csv', 'json'}
-
-
-def allowed_file(filename):
-    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
 
 @data_api.route('/', methods=['GET'])
@@ -111,7 +109,6 @@ def generate_csv():
     file = 'D:/Project/ASEAN-IndiaHackathon/backend/static/csv/fishing_data.csv'
     with open(file, 'w') as csvfile:
         output_csv = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-
         headers = [
             'date',
             'lat_bin',
@@ -129,7 +126,6 @@ def generate_csv():
         ]
 
         output_csv.writerow(headers)
-
         for record in DataModels.get_all_data():
             output_csv.writerow([getattr(record, c) for c in db_headers])
 
@@ -147,16 +143,17 @@ def upload_file():
         }), status=400)
 
     file = request.files['file']
-
     if file.filename == '':
         return Response(mimetype="application/json", response=json.dumps({
             "message": "No File Selected for Uploading",
             "status": 400,
         }), status=400)
 
+    save_path = os.path.join(os.getenv('UPLOAD_FOLDER'))
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
-        file.save(os.path.join(os.getenv('UPLOAD_FOLDER'), filename))
+        file.save(save_path + filename)
+        save_to_db(save_path + filename)
         return Response(mimetype="application/json", response=json.dumps({
             "message": "File Successfully Uploaded",
             "status": 201,
@@ -167,3 +164,30 @@ def upload_file():
             "message": "File Types are not Allowed! Allowed File type ('txt', 'csv', 'json')",
             "status": 400,
         }), status=400)
+
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+
+def load_csv_data(file_path):
+    data = genfromtxt(file_path, delimiter=',', skip_header=1, converters={0: lambda s: str(s)})
+    return data.tolist()
+
+
+def save_to_db(file_path):
+    dataset = load_csv_data(file_path)
+    format_date = "%Y-%m-%d %H:%M:%S"
+    for data in dataset:
+        date = datetime.datetime.strptime(data[0][1:].replace("'", ""), format_date)
+        record = {
+            'created_at': date,
+            'lat': data[1],
+            'long': data[2],
+            'frequency': data[3],
+            'fishing_hours': data[4],
+            'source_id': 2
+        }
+
+        data = DataModels(record)
+        data.save()
