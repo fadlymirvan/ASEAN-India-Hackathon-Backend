@@ -34,7 +34,12 @@ class DataModels(db.Model):
         db.session.add(self)
         db.session.commit()
 
-    def update(self):
+    def update(self, data):
+        self.lat = data.get('lat')
+        self.long = data.get('long')
+        self.source_id = data.get('source_id')
+        self.frequency = data.get('frequency')
+        self.fishing_hours = data.get('fishing_hours')
         self.updated_at = datetime.datetime.utcnow()
         db.session.commit()
 

@@ -57,15 +57,8 @@ def get_by_id(source_id):
 @source_api.route('/<int:source_id>', methods=['PUT'])
 def update(source_id):
     req = request.get_json()
-    data = SourceModels.get_source_by_id(source_id)
-    if not data:
-        return Response(mimetype="application/json", response=json.dumps({
-            "message": "Data Not Found",
-            "status": 404
-        }), status=404)
-
     try:
-        data = source_schema.load(req, partial=True)
+        data_req = source_schema.load(req, partial=True)
 
     except Exception as err:
         return Response(mimetype="application/json", response=json.dumps({
@@ -73,7 +66,14 @@ def update(source_id):
             "status": 400
         }), status=400)
 
-    data.update(data)
+    data = SourceModels.get_source_by_id(source_id)
+    if not data:
+        return Response(mimetype="application/json", response=json.dumps({
+            "message": "Data Not Found",
+            "status": 404
+        }), status=404)
+
+    data.update(data_req)
     data = source_schema.dump(data)
     return Response(mimetype="application/json", response=json.dumps({
         "message": "Updated Successfully",

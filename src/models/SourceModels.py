@@ -26,7 +26,9 @@ class SourceModels(db.Model):
         db.session.add(self)
         db.session.commit()
 
-    def update(self):
+    def update(self, data):
+        self.name = data.get('name')
+        self.type = data.get('type')
         self.updated_at = datetime.datetime.utcnow()
         db.session.commit()
 

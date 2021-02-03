@@ -64,15 +64,8 @@ def get_by_id(data_id):
 @data_api.route('/<int:data_id>', methods=['PUT'])
 def update(data_id):
     req = request.get_json()
-    data = DataModels.get_data_by_id(data_id)
-    if not data:
-        return Response(mimetype="application/json", response=json.dumps({
-            "message": "Data Not Found",
-            "status": 404,
-        }), status=404)
-
     try:
-        data = data_schema.load(req, partial=True)
+        data_req = data_schema.load(req, partial=True)
 
     except Exception as err:
         return Response(mimetype="application/json", response=json.dumps({
@@ -80,7 +73,14 @@ def update(data_id):
             "status": 400,
         }), status=400)
 
-    data.update(data)
+    data = DataModels.get_data_by_id(data_id)
+    if not data:
+        return Response(mimetype="application/json", response=json.dumps({
+            "message": "Data Not Found",
+            "status": 404,
+        }), status=404)
+
+    data.update(data_req)
     data = data_schema.dump(data)
     return Response(mimetype="application/json", response=json.dumps({
         "message": "Updated Successfully",
