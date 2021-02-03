@@ -15,14 +15,16 @@ def SignUp():
 
     except Exception as err:
         return Response(mimetype="application/json", response=json.dumps({
-            "message": err
+            "message": err,
+            "status": 400
         }), status=400)
 
     # Check If Email Exists in th DB
     is_user = UserModels.get_user_by_email(data.get('email'))
     if is_user:
         return Response(mimetype="application/json", response=json.dumps({
-            "message": 'Email already taken, please use another email address.'
+            "message": 'Email already taken, please use another email address.',
+            "status": 400
         }), status=400)
 
     # Save to database
@@ -36,6 +38,7 @@ def SignUp():
     return Response(mimetype="application/json", response=json.dumps({
         "message": "Created Successfully",
         "token": token,
+        "status": 201
     }), status=201)
 
 
@@ -47,22 +50,26 @@ def SignIn():
 
     except Exception as err:
         return Response(mimetype="application/json", response=json.dumps({
-            "message": err
+            "message": err,
+            "status": 400
         }), status=400)
     is_user = UserModels.get_user_by_email(data.get('email'))
     if not data.get('email') or not data.get('password'):
         return Response(mimetype="application/json", response=json.dumps({
-            "message": "Email and Password Cannot Be Empty!"
+            "message": "Email and Password Cannot Be Empty!",
+            "status": 400
         }), status=400)
 
     if not is_user:
         return Response(mimetype="application/json", response=json.dumps({
-            "message": "Invalid Email Address"
+            "message": "Invalid Email Address",
+            "status": 400
         }), status=400)
 
     if not is_user.check_hash(data.get('password')):
         return Response(mimetype="application/json", response=json.dumps({
-            "message": "Invalid Password"
+            "message": "Invalid Password",
+            "status": 400
         }), status=400)
 
     # Generate Token
@@ -71,7 +78,8 @@ def SignIn():
 
     return Response(mimetype="application/json", response=json.dumps({
         "message": "Login Successfully",
-        "token": token
+        "token": token,
+        "status": 200
     }), status=200)
 
 
@@ -81,5 +89,6 @@ def get_all_user():
     data = user_schema.dump(req, many=True)
 
     return Response(mimetype="application/json", response=json.dumps({
-        "data": data
+        "data": data,
+        "status": 200
     }), status=200)

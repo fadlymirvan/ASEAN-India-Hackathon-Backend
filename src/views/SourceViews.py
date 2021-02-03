@@ -12,7 +12,8 @@ def get_all():
     data = source_schema.dump(req, many=True)
 
     return Response(mimetype="application/json", response=json.dumps({
-        "data": data
+        "data": data,
+        "status": 200
     }), status=200)
 
 
@@ -24,14 +25,16 @@ def create():
 
     except Exception as err:
         return Response(mimetype="application/json", response=json.dumps({
-            "message": err
+            "message": err,
+            "status": 400
         }), status=400)
 
     data = SourceModels(data)
     data.save()
 
     return Response(mimetype="application/json", response=json.dumps({
-        "message": "Created Successfully!"
+        "message": "Created Successfully!",
+        "status": 201
     }), status=201)
 
 
@@ -40,12 +43,14 @@ def get_by_id(source_id):
     req = SourceModels.get_source_by_id(source_id)
     if not req:
         return Response(mimetype="application/json", response=json.dumps({
-            "message": "Data Not Found"
+            "message": "Data Not Found",
+            "status": 404
         }), status=404)
 
     data = source_schema.dump(req)
     return Response(mimetype="application/json", response=json.dumps({
-        "data": data
+        "data": data,
+        "status": 200
     }), status=200)
 
 
@@ -55,7 +60,8 @@ def update(source_id):
     data = SourceModels.get_source_by_id(source_id)
     if not data:
         return Response(mimetype="application/json", response=json.dumps({
-            "message": "Data Not Found"
+            "message": "Data Not Found",
+            "status": 404
         }), status=404)
 
     try:
@@ -63,14 +69,16 @@ def update(source_id):
 
     except Exception as err:
         return Response(mimetype="application/json", response=json.dumps({
-            "message": err
+            "message": err,
+            "status": 400
         }), status=400)
 
     data.update(data)
     data = source_schema.dump(data)
     return Response(mimetype="application/json", response=json.dumps({
         "message": "Updated Successfully",
-        "data": data
+        "data": data,
+        "status": 200
     }), status=200)
 
 
@@ -79,11 +87,13 @@ def delete(source_id):
     data = SourceModels.get_source_by_id(source_id)
     if not data:
         return Response(mimetype="application/json", response=json.dumps({
-            "message": "Data Not Found"
+            "message": "Data Not Found",
+            "status": 404
         }), status=404)
 
     data.delete()
 
     return Response(mimetype="application/json", response=json.dumps({
         "message": "Deleted Successfully",
+        "status": 200
     }), status=200)

@@ -20,7 +20,8 @@ class Auth():
         except Exception:
             return Response(
                 mimetype="application/json", response=json.dumps({
-                    "message" : "Error in Generating Token."
+                    "message" : "Error in Generating Token.",
+                    "status": 400
                 }), status=400)
 
     @staticmethod
