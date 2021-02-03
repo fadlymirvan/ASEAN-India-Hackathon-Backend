@@ -108,7 +108,7 @@ def delete(data_id):
 
 @data_api.route('/csv/download', methods=['GET'])
 def generate_csv():
-    file = 'D:/Project/ASEAN-IndiaHackathon/backend/static/csv/fishing_data.csv'
+    file = os.getenv("GENERATE_CSV_FILE")
     with open(file, 'w') as csvfile:
         output_csv = csv.writer(csvfile, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
         headers = [
